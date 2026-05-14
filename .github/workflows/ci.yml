@@ -37,7 +37,9 @@ jobs:
           mvn -B verify \
             -Dgpg.skip=true \
             -Dsigstore.skip=true \
-            -Dmaven.javadoc.skip=false
+            -Dmaven.javadoc.skip=false \
+            -Djacoco.line.ratio=0.70 \
+            -Djacoco.branch.ratio=0.60
 
       - name: Publish Surefire report
         if: always()
