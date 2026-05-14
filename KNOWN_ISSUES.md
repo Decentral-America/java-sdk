@@ -63,3 +63,20 @@ These cannot be easily forked because `lang` is the Ride compiler — a large, c
 **Description:** JaCoCo coverage thresholds are set to 20%/7% for local builds (unit tests only). Docker integration tests (10 test classes) are skipped gracefully when Docker is not available. Full coverage (expected ~70%+) only runs in CI where Docker is available. CI enforces 70%/60% thresholds.
 
 **Resolution path:** No action needed — coverage enforcement is already in `ci.yml`.
+
+---
+
+## KNOWN-5: Transitive compile-scope deps flagged as test-only by dependency analyzer
+
+**Risk:** INFO
+
+**Description:** `mvn dependency:analyze` reports three dependencies as "Non-test scoped test only":
+- `org.web3j:crypto` — transitive from `waves-transactions`; used internally by `WavesEthConverter.java` through the upstream library's own API
+- `com.wavesplatform:protobuf-schemas` — transitive from `waves-transactions`
+- `com.google.protobuf:protobuf-java` — transitive from `waves-transactions`; pinned in `<dependencyManagement>` for version alignment only
+
+These are resolved at compile scope because `waves-transactions` (a runtime compile dep) declares them as compile dependencies. Our production source does not call their APIs directly — but they must remain on the compile classpath at runtime for `waves-transactions` to function.
+
+**Why not fixed now:** Moving them to `test` scope would break `waves-transactions` at runtime (it needs them on the classpath). Fixing this properly requires forking `waves-transactions` (see KNOWN-2).
+
+**Resolution path:** Resolved automatically when KNOWN-2 is addressed (fork of `waves-transactions` → full control over the dependency tree).
