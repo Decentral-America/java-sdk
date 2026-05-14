@@ -4,18 +4,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.wavesplatform</groupId>
-    <artifactId>wavesj</artifactId>
+    <groupId>io.decentralchain</groupId>
+    <artifactId>java-sdk</artifactId>
     <version>1.6.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jacoco.version>0.8.14</jacoco.version>
+        <spotbugs.version>4.9.8.3</spotbugs.version>
+        <checkstyle.version>3.6.0</checkstyle.version>
     </properties>
 
-    <name>WavesJ</name>
-    <description>Java library to interact with the Waves blockchain</description>
-    <url>https://github.com/wavesplatform/WavesJ</url>
+    <name>DecentralChain Java SDK</name>
+    <description>Java SDK for the DecentralChain blockchain</description>
+    <url>https://github.com/Decentral-America/java-sdk</url>
 
     <licenses>
         <license>
@@ -26,20 +29,21 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/wavesplatform/WavesJ</url>
+        <connection>scm:git:git://github.com/Decentral-America/java-sdk.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/Decentral-America/java-sdk.git</developerConnection>
+        <url>https://github.com/Decentral-America/java-sdk</url>
     </scm>
 
     <developers>
         <developer>
-            <id>petermz</id>
-            <name>Peter Zhelezniakov</name>
-            <email>peterz@rambler.ru</email>
-            <organization>Waves</organization>
-            <organizationUrl>https://waves.tech/</organizationUrl>
+            <id>decentralchain</id>
+            <name>DecentralChain Team</name>
+            <email>dev@decentralchain.io</email>
+            <organization>DecentralChain</organization>
+            <organizationUrl>https://decentralchain.io</organizationUrl>
             <roles>
                 <role>Developer</role>
             </roles>
-            <timezone>+3</timezone>
         </developer>
     </developers>
 
@@ -88,7 +92,7 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.9.0</version>
+                <version>0.10.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <autoPublish>true</autoPublish>
@@ -106,6 +110,12 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
+                        <configuration>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -134,6 +144,91 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.4</version>
+                <configuration>
+                    <argLine>${jacoco.agent.argLine}</argLine>
+                </configuration>
+            </plugin>
+            <!-- Coverage -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals><goal>prepare-agent</goal></goals>
+                        <configuration>
+                            <propertyName>jacoco.agent.argLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals><goal>report</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <phase>verify</phase>
+                        <goals><goal>check</goal></goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.70</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.70</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Static analysis -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs.version}</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>High</threshold>
+                    <failOnError>true</failOnError>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>spotbugs-check</id>
+                        <phase>verify</phase>
+                        <goals><goal>check</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Code style -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle.version}</version>
+                <configuration>
+                    <configLocation>google_checks.xml</configLocation>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <violationSeverity>warning</violationSeverity>
+                    <excludes>**/module-info.java</excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>checkstyle-validate</id>
+                        <phase>validate</phase>
+                        <goals><goal>check</goal></goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -241,16 +336,12 @@
             <version>3.27.7</version>
             <scope>test</scope>
         </dependency>
+        <!-- testcontainers 2.x — junit-jupiter module dropped; container lifecycle
+             handled via static initializer in BaseTestWithNodeInDocker -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
-            <version>2.0.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>1.21.4</version>
+            <version>2.0.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>

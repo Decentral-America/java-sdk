@@ -1,3 +1,33 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+
+### Added
+- Forked from [wavesplatform/WavesJ](https://github.com/wavesplatform/WavesJ) v1.6.4
+- Rebranded to **DecentralChain Java SDK** (`io.decentralchain:java-sdk`)
+- JaCoCo code coverage enforcement (70% line/branch minimum)
+- SpotBugs static analysis (High threshold, Max effort)
+- Checkstyle style enforcement (Google Java Style)
+- GitHub Actions CI matrix: Java 11, 17, 21
+- GitHub Actions publish workflow with dry-run option
+- Maven wrapper (`mvnw`) for reproducible builds
+- `.editorconfig` for consistent editor settings
+
+### Changed
+- `groupId`: `com.wavesplatform` → `io.decentralchain`
+- `artifactId`: `wavesj` → `java-sdk`
+- `central-publishing-maven-plugin`: 0.9.0 → 0.10.0
+- `testcontainers`: 2.0.3 → 2.0.5
+- GPG loopback pinentry mode declared in pom.xml
+- SCM block updated to Decentral-America/java-sdk
+
+### Removed
+- Dead dependency `org.testcontainers:junit-jupiter:1.21.4` (unused — no @Testcontainers annotations in test sources)
+
+---
+
 ## 1.0.0
 - significantly redesigned interface
 - based on [Waves Crypto](https://github.com/wavesplatform/waves-crypto-java) and [Waves transactions](https://github.com/wavesplatform/waves-transactions-java) libraries

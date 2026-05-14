@@ -1,0 +1,54 @@
+name: Publish to Maven Central
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (skip actual publish)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write # required for sigstore keyless signing
+
+jobs:
+  publish:
+    name: Maven Central Publish
+    runs-on: ubuntu-latest
+    environment: maven-central
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Java 11
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          java-version: 11
+          distribution: temurin
+          cache: maven
+          server-id: central
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: Verify build before publishing
+        run: |
+          mvn -B verify \
+            -Dgpg.skip=true \
+            -Dsigstore.skip=true
+
+      - name: Deploy to Maven Central
+        if: ${{ !inputs.dry_run }}
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: |
+          mvn -B deploy \
+            -DskipTests \
+            -Dgpg.pinentry-mode=loopback
+
+      - name: Dry run summary
+        if: ${{ inputs.dry_run }}
+        run: echo "Dry run complete — skipped central deploy"
