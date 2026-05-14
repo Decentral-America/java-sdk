@@ -52,7 +52,7 @@ These cannot be easily forked because `lang` is the Ride compiler — a large, c
 **Resolution path:**
 - Apply Google Java formatter to all source files in a single formatting commit
 - Enable `failOnViolation=true` in `pom.xml`
-- Track as `DCC-241`
+- File a dedicated Jira ticket (DCC-241 is taken — use next available DCC-### in the Maven Independence epic)
 
 ---
 
