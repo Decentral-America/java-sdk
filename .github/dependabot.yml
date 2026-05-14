@@ -1,0 +1,36 @@
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      maven-plugins:
+        patterns:
+          - "org.apache.maven.plugins:*"
+          - "org.sonatype.central:*"
+          - "dev.sigstore:*"
+          - "com.github.spotbugs:*"
+          - "org.jacoco:*"
+      testcontainers:
+        patterns:
+          - "org.testcontainers:*"
+      testing:
+        patterns:
+          - "org.junit.jupiter:*"
+          - "org.assertj:*"
+          - "org.mockito:*"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns:
+          - "actions/*"
+          - "scacap/*"
